@@ -45,5 +45,9 @@
     }
   },
   "minimum-stability": "dev",
-  "require": {}
+  "require": {
+    "ext-soap": "*",
+    "nesbot/carbon": "*",
+    "paypal/rest-api-sdk-php": "*"
+  }
 }

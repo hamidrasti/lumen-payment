@@ -6,6 +6,12 @@ use Illuminate\Support\ServiceProvider;
 
 class PaymentServiceProvider extends ServiceProvider
 {
+    /**
+     * Indicates if loading of the provider is deferred.
+     *
+     * @var bool
+     */
+    protected $defer = false;
 
     /**
      * Bootstrap the application services.
@@ -24,7 +30,9 @@ class PaymentServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton('gateway', function () {
+            return new GatewayResolver();
+        });
     }
 
 }
