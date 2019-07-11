@@ -9,185 +9,189 @@ use Hamraa\Payment\PortInterface;
 
 class Payline extends PortAbstract implements PortInterface
 {
-	/**
-	 * Address of main CURL server
-	 *
-	 * @var string
-	 */
-	protected $serverUrl = 'https://pay.ir/payment/send';
+    /**
+     * Address of main CURL server
+     *
+     * @var string
+     */
+    protected $serverUrl = 'https://pay.ir/payment/send';
 
-	/**
-	 * Address of CURL server for verify payment
-	 *
-	 * @var string
-	 */
-	protected $serverVerifyUrl = 'https://pay.ir/payment/verify';
+    /**
+     * Address of CURL server for verify payment
+     *
+     * @var string
+     */
+    protected $serverVerifyUrl = 'https://pay.ir/payment/verify';
 
-	/**
-	 * Address of gate for redirect
-	 *
-	 * @var string
-	 */
-	protected $gateUrl = 'https://pay.ir/payment/gateway/';
+    /**
+     * Address of gate for redirect
+     *
+     * @var string
+     */
+    protected $gateUrl = 'https://pay.ir/payment/gateway/';
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function set($amount)
-	{
-		$this->amount = $amount;
+    protected $refIf;
 
-		return $this;
-	}
+    /**
+     * {@inheritdoc}
+     */
+    public function set($amount)
+    {
+        $this->amount = $amount;
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function ready()
-	{
-		$this->sendPayRequest();
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * {@inheritdoc}
+     */
+    public function ready()
+    {
+        $this->sendPayRequest();
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function redirect()
-	{
-		return \Redirect::to($this->gateUrl . $this->refId);
-	}
+        return $this;
+    }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function verify($transaction)
-	{
-		parent::verify($transaction);
+    /**
+     * {@inheritdoc}
+     */
+    public function redirect()
+    {
+        return redirect($this->gateUrl . $this->refId);
+    }
 
-		$this->userPayment();
-		$this->verifyPayment();
+    /**
+     * {@inheritdoc}
+     */
+    public function verify($transaction)
+    {
+        parent::verify($transaction);
 
-		return $this;
-	}
+        $this->userPayment();
+        $this->verifyPayment();
 
-	/**
-	 * Sets callback url
-	 * @param $url
-	 */
-	function setCallback($url)
-	{
-		$this->callbackUrl = $url;
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Gets callback url
-	 * @return string
-	 */
-	function getCallback()
-	{
-		if (!$this->callbackUrl)
-			$this->callbackUrl = $this->config->get('gateway.payline.callback-url');
+    /**
+     * Sets callback url
+     *
+     * @param $url
+     * @return Payline
+     */
+    function setCallback($url)
+    {
+        $this->callbackUrl = $url;
+        return $this;
+    }
 
-		return urlencode($this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]));
-	}
+    /**
+     * Gets callback url
+     * @return string
+     */
+    function getCallback()
+    {
+        if (!$this->callbackUrl)
+            $this->callbackUrl = $this->config->get('gateway.payline.callback-url');
 
-	/**
-	 * Send pay request to server
-	 *
-	 * @return void
-	 *
-	 * @throws PaylineSendException
-	 */
-	protected function sendPayRequest()
-	{
-		$this->newTransaction();
+        return urlencode($this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]));
+    }
 
-		$fields = array(
-			'api' => $this->config->get('gateway.payline.api'),
-			'amount' => $this->amount,
-			'redirect' => $this->getCallback(),
-		);
+    /**
+     * Send pay request to server
+     *
+     * @return bool
+     *
+     * @throws PaylineSendException
+     */
+    protected function sendPayRequest()
+    {
+        $this->newTransaction();
 
-		$ch = curl_init();
+        $fields = array(
+            'api' => $this->config->get('gateway.payline.api'),
+            'amount' => $this->amount,
+            'redirect' => $this->getCallback(),
+        );
 
-		curl_setopt($ch, CURLOPT_URL, $this->serverUrl);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $ch = curl_init();
 
-		$response = curl_exec($ch);
-		curl_close($ch);
+        curl_setopt($ch, CURLOPT_URL, $this->serverUrl);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-		if (is_numeric($response) && $response > 0) {
-			$this->refId = $response;
-			$this->transactionSetRefId();
+        $response = curl_exec($ch);
+        curl_close($ch);
 
-			return true;
-		}
+        if (is_numeric($response) && $response > 0) {
+            $this->refId = $response;
+            $this->transactionSetRefId();
 
-		$this->transactionFailed();
-		$this->newLog($response, PaylineSendException::$errors[$response]);
-		throw new PaylineSendException($response);
-	}
+            return true;
+        }
 
-	/**
-	 * Check user payment with GET data
-	 *
-	 * @return bool
-	 *
-	 * @throws PaylineReceiveException
-	 */
-	protected function userPayment()
-	{
-		$this->refIf = Input::get('id_get');
-		$trackingCode = Input::get('trans_id');
+        $this->transactionFailed();
+        $this->newLog($response, PaylineSendException::$errors[$response]);
+        throw new PaylineSendException($response);
+    }
 
-		if (is_numeric($trackingCode) && $trackingCode > 0) {
-			$this->trackingCode = $trackingCode;
-			return true;
-		}
+    /**
+     * Check user payment with GET data
+     *
+     * @return bool
+     *
+     * @throws PaylineReceiveException
+     */
+    protected function userPayment()
+    {
+        $this->refIf = Input::get('id_get');
+        $trackingCode = Input::get('trans_id');
 
-		$this->transactionFailed();
-		$this->newLog(-4, PaylineReceiveException::$errors[-4]);
-		throw new PaylineReceiveException(-4);
-	}
+        if (is_numeric($trackingCode) && $trackingCode > 0) {
+            $this->trackingCode = $trackingCode;
+            return true;
+        }
 
-	/**
-	 * Verify user payment from zarinpal server
-	 *
-	 * @return bool
-	 *
-	 * @throws PaylineReceiveException
-	 */
-	protected function verifyPayment()
-	{
-		$fields = array(
-			'api' => $this->config->get('gateway.payline.api'),
-			'id_get' => $this->refId(),
-			'trans_id' => $this->trackingCode()
-		);
+        $this->transactionFailed();
+        $this->newLog(-4, PaylineReceiveException::$errors[-4]);
+        throw new PaylineReceiveException(-4);
+    }
 
-		$ch = curl_init();
+    /**
+     * Verify user payment from zarinpal server
+     *
+     * @return bool
+     *
+     * @throws PaylineReceiveException
+     */
+    protected function verifyPayment()
+    {
+        $fields = array(
+            'api' => $this->config->get('gateway.payline.api'),
+            'id_get' => $this->refId(),
+            'trans_id' => $this->trackingCode()
+        );
 
-		curl_setopt($ch, CURLOPT_URL, $this->serverVerifyUrl);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $ch = curl_init();
 
-		$response = curl_exec($ch);
-		curl_close($ch);
+        curl_setopt($ch, CURLOPT_URL, $this->serverVerifyUrl);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-		if ($response == 1) {
-			$this->transactionSucceed();
-			$this->newLog($response, Gateways::TRANSACTION_SUCCEED_TEXT);
+        $response = curl_exec($ch);
+        curl_close($ch);
 
-			return true;
-		}
+        if ($response == 1) {
+            $this->transactionSucceed();
+            $this->newLog($response, Gateways::TRANSACTION_SUCCEED_TEXT);
 
-		$this->transactionFailed();
-		$this->newLog($response, PaylineReceiveException::$errors[$response]);
-		throw new PaylineReceiveException($response);
-	}
+            return true;
+        }
+
+        $this->transactionFailed();
+        $this->newLog($response, PaylineReceiveException::$errors[$response]);
+        throw new PaylineReceiveException($response);
+    }
 }

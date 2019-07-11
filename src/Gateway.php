@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @see \Hamraa\Payment\GatewayResolver
+ * @method static make(Gateways\Mellat\Mellat $param)
  */
 class Gateway extends Facade
 {

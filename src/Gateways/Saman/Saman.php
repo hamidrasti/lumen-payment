@@ -1,17 +1,22 @@
 <?php
 
+/** @noinspection PhpUndefinedMethodInspection */
+
+/** @noinspection PhpRedundantCatchClauseInspection */
+
 namespace Hamraa\Payment\Gateways\Saman;
 
 use Illuminate\Support\Facades\Input;
 use SoapClient;
 use Hamraa\Payment\PortAbstract;
 use Hamraa\Payment\PortInterface;
+use SoapFault;
 
 class Saman extends PortAbstract implements PortInterface
 {
     /**
      *
-     * @var Array $optional_data An array of optional data
+     * @var array $optional_data An array of optional data
      *  that will be sent with the payment request
      *
      */
@@ -48,14 +53,14 @@ class Saman extends PortAbstract implements PortInterface
      *
      * Add optional data to the request
      *
-     * @param Array $data an array of data
+     * @param array $data an array of data
      *
      */
-    function setOptionalData (Array $data)
+    function setOptionalData(Array $data)
     {
         $this->optional_data = $data;
     }
-    
+
 
     /**
      * {@inheritdoc}
@@ -63,15 +68,15 @@ class Saman extends PortAbstract implements PortInterface
     public function redirect()
     {
         $main_data = [
-            'amount'        => $this->amount,
-            'merchant'      => $this->config->get('gateway.saman.merchant'),
-            'resNum'        => $this->transactionId(),
-            'callBackUrl'   => $this->getCallback()
+            'amount' => $this->amount,
+            'merchant' => $this->config->get('gateway.saman.merchant'),
+            'resNum' => $this->transactionId(),
+            'callBackUrl' => $this->getCallback()
         ];
 
         $data = array_merge($main_data, $this->optional_data);
-        
-        return \View::make('gateway::saman-redirector')->with($data);
+
+        return view('gateway::saman-redirector')->with($data);
     }
 
     /**
@@ -89,7 +94,9 @@ class Saman extends PortAbstract implements PortInterface
 
     /**
      * Sets callback url
+     *
      * @param $url
+     * @return Saman
      */
     function setCallback($url)
     {
@@ -158,7 +165,7 @@ class Saman extends PortAbstract implements PortInterface
             $soap = new SoapClient($this->serverUrl);
             $response = $soap->VerifyTransaction($fields["RefNum"], $fields["merchantID"]);
 
-        } catch (\SoapFault $e) {
+        } catch (SoapFault $e) {
             $this->transactionFailed();
             $this->newLog('SoapFault', $e->getMessage());
             throw $e;
@@ -176,12 +183,11 @@ class Saman extends PortAbstract implements PortInterface
         }
 
         //Reverse Transaction
-        if($response>0){
+        if ($response > 0) {
             try {
                 $soap = new SoapClient($this->serverUrl);
                 $response = $soap->ReverseTransaction($fields["RefNum"], $fields["merchantID"], $fields["password"], $response);
-
-            } catch (\SoapFault $e) {
+            } catch (SoapFault $e) {
                 $this->transactionFailed();
                 $this->newLog('SoapFault', $e->getMessage());
                 throw $e;
@@ -193,7 +199,6 @@ class Saman extends PortAbstract implements PortInterface
         $this->transactionFailed();
         $this->newLog($response, SamanException::$errors[$response]);
         throw new SamanException($response);
-        
 
 
     }

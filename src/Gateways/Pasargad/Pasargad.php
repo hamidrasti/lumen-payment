@@ -4,7 +4,6 @@ namespace Hamraa\Payment\Gateways\Pasargad;
 
 use Illuminate\Support\Facades\Input;
 use Hamraa\Payment\Gateways;
-use Hamraa\Payment\Parsian\ParsianErrorException;
 use Hamraa\Payment\PortAbstract;
 use Hamraa\Payment\PortInterface;
 
@@ -109,9 +108,10 @@ class Pasargad extends PortAbstract implements PortInterface
     /**
      * Send pay request to parsian gateway
      *
-     * @return bool
+     * @param $payment_id
+     * @param $callback_url
+     * @return void
      *
-     * @throws ParsianErrorException
      */
     protected function sendPayRequest($payment_id, $callback_url)
     {
@@ -121,7 +121,7 @@ class Pasargad extends PortAbstract implements PortInterface
     /**
      * Verify payment
      *
-     * @throws ParsianErrorException
+     * @throws PasargadErrorException
      */
     protected function verifyPayment()
     {

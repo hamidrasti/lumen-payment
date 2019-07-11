@@ -2,9 +2,7 @@
 
 namespace Hamraa\Payment\Gateways\Paypal;
 
-use Hamraa\Payment\Mellat\MellatException;
 use Hamraa\Payment\Gateways;
-use Hamraa\Payment\Paypal\PaypalException;
 use Illuminate\Support\Facades\Input;
 use Hamraa\Payment\PortAbstract;
 use Hamraa\Payment\PortInterface;
@@ -43,6 +41,7 @@ class Paypal extends PortAbstract implements PortInterface
     /**
      * Sets callback url
      * @param $url
+     * @return Paypal
      */
     function setCallback($url)
     {
@@ -180,9 +179,8 @@ class Paypal extends PortAbstract implements PortInterface
     /**
      * Check user payment
      *
-     * @return bool
+     * @return void
      *
-     * @throws MellatException
      */
     protected function userPayment()
     {
@@ -195,6 +193,7 @@ class Paypal extends PortAbstract implements PortInterface
      * Verify user payment from paypal server
      *
      * @return bool
+     * @throws \Exception
      */
     protected function verifyPayment()
     {

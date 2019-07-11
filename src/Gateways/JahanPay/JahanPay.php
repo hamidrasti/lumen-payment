@@ -1,5 +1,9 @@
 <?php
 
+/** @noinspection PhpUndefinedMethodInspection */
+
+/** @noinspection PhpRedundantCatchClauseInspection */
+
 namespace Hamraa\Payment\Gateways\JahanPay;
 
 use Illuminate\Support\Facades\Input;
@@ -49,7 +53,7 @@ class JahanPay extends PortAbstract implements PortInterface
      */
     public function redirect()
     {
-        return \Redirect::to($this->gateUrl.$this->refId());
+        return redirect($this->gateUrl . $this->refId());
     }
 
     /**
@@ -67,7 +71,9 @@ class JahanPay extends PortAbstract implements PortInterface
 
     /**
      * Sets callback url
+     *
      * @param $url
+     * @return JahanPay
      */
     function setCallback($url)
     {
@@ -90,9 +96,10 @@ class JahanPay extends PortAbstract implements PortInterface
     /**
      * Send pay request to server
      *
-     * @return void
+     * @return bool
      *
      * @throws JahanPayException
+     * @throws \SoapFault
      */
     protected function sendPayRequest()
     {
@@ -108,7 +115,7 @@ class JahanPay extends PortAbstract implements PortInterface
                 ''
             );
 
-        } catch(\SoapFault $e) {
+        } catch (\SoapFault $e) {
             $this->transactionFailed();
             $this->newLog('SoapFault', $e->getMessage());
             throw $e;
@@ -151,6 +158,7 @@ class JahanPay extends PortAbstract implements PortInterface
      * @return bool
      *
      * @throws JahanPayException
+     * @throws \SoapFault
      */
     protected function verifyPayment()
     {
@@ -162,7 +170,7 @@ class JahanPay extends PortAbstract implements PortInterface
                 $this->refId
             );
 
-        } catch(\SoapFault $e) {
+        } catch (\SoapFault $e) {
             $this->transactionFailed();
             $this->newLog('SoapFault', $e->getMessage());
             throw $e;

@@ -1,8 +1,9 @@
-<?php
+<?php /** @noinspection PhpUndefinedMethodInspection */
+
+/** @noinspection PhpRedundantCatchClauseInspection */
 
 namespace Hamraa\Payment\Gateways\Zarinpal;
 
-use DateTime;
 use Illuminate\Support\Facades\Input;
 use Hamraa\Payment\Gateways;
 use SoapClient;
@@ -81,6 +82,8 @@ class Zarinpal extends PortAbstract implements PortInterface
 	 */
 	protected $zarinGateUrl = 'https://www.zarinpal.com/pg/StartPay/$Authority/ZarinGate';
 
+	protected $authority;
+
 	public function boot()
 	{
 		$this->setServer();
@@ -113,12 +116,12 @@ class Zarinpal extends PortAbstract implements PortInterface
 	{
 		switch ($this->config->get('gateway.zarinpal.type')) {
 			case 'zarin-gate':
-				return \Redirect::to(str_replace('$Authority', $this->refId, $this->zarinGateUrl));
+				return redirect(str_replace('$Authority', $this->refId, $this->zarinGateUrl));
 				break;
 
 			case 'normal':
 			default:
-				return \Redirect::to($this->gateUrl . $this->refId);
+				return redirect($this->gateUrl . $this->refId);
 				break;
 		}
 	}
@@ -136,10 +139,11 @@ class Zarinpal extends PortAbstract implements PortInterface
 		return $this;
 	}
 
-	/**
-	 * Sets callback url
-	 * @param $url
-	 */
+    /**
+     * Sets callback url
+     * @param $url
+     * @return Zarinpal
+     */
 	function setCallback($url)
 	{
 		$this->callbackUrl = $url;
@@ -158,13 +162,14 @@ class Zarinpal extends PortAbstract implements PortInterface
 		return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
 	}
 
-	/**
-	 * Send pay request to server
-	 *
-	 * @return void
-	 *
-	 * @throws ZarinpalException
-	 */
+    /**
+     * Send pay request to server
+     *
+     * @return void
+     *
+     * @throws ZarinpalException
+     * @throws \SoapFault
+     */
 	protected function sendPayRequest()
 	{
 		$this->newTransaction();
@@ -219,13 +224,14 @@ class Zarinpal extends PortAbstract implements PortInterface
 		throw new ZarinpalException(-22);
 	}
 
-	/**
-	 * Verify user payment from zarinpal server
-	 *
-	 * @return bool
-	 *
-	 * @throws ZarinpalException
-	 */
+    /**
+     * Verify user payment from zarinpal server
+     *
+     * @return bool
+     *
+     * @throws ZarinpalException
+     * @throws \SoapFault
+     */
 	protected function verifyPayment()
 	{
 

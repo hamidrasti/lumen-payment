@@ -46,7 +46,12 @@
   },
   "minimum-stability": "dev",
   "require": {
+    "ext-xml": "*",
     "ext-soap": "*",
+    "ext-curl": "*",
+    "ext-simplexml": "*",
+    "ext-json": "*",
+    "ext-libxml": "*",
     "nesbot/carbon": "*",
     "paypal/rest-api-sdk-php": "*"
   }

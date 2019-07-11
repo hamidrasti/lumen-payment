@@ -1,5 +1,9 @@
 <?php
 
+/** @noinspection PhpUndefinedMethodInspection */
+
+/** @noinspection PhpRedundantCatchClauseInspection */
+
 namespace Hamraa\Payment\Gateways\Asanpardakht;
 
 use Illuminate\Support\Facades\Input;
@@ -61,7 +65,9 @@ class Asanpardakht extends PortAbstract implements PortInterface
 
     /**
      * Sets callback url
+     *
      * @param $url
+     * @return Asanpardakht
      */
     function setCallback($url)
     {
@@ -89,6 +95,7 @@ class Asanpardakht extends PortAbstract implements PortInterface
      * @return void
      *
      * @throws AsanpardakhtException
+     * @throws \SoapFault
      */
     protected function sendPayRequest()
     {
@@ -176,7 +183,7 @@ class Asanpardakht extends PortAbstract implements PortInterface
      * @return bool
      *
      * @throws AsanpardakhtException
-     * @throws SoapFault
+     * @throws \SoapFault
      */
     protected function verifyAndSettlePayment()
     {
@@ -227,7 +234,6 @@ class Asanpardakht extends PortAbstract implements PortInterface
 
         return true;
     }
-
 
 
     /**

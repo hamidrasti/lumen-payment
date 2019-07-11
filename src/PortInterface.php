@@ -2,6 +2,9 @@
 
 namespace Hamraa\Payment;
 
+use Hamraa\Payment\Exceptions\BankException;
+use SoapFault;
+
 interface PortInterface
 {
 
@@ -18,6 +21,9 @@ interface PortInterface
      * This method use for done everything that necessary before redirect to port.
      *
      * @return $this
+     *
+     * @throws BankException
+     * @throws SoapFault
      */
     public function ready();
 
@@ -59,6 +65,7 @@ interface PortInterface
     /**
      * Sets callback url
      *
+     * @param $url
      * @return string
      */
     public function setCallback($url);
@@ -84,6 +91,8 @@ interface PortInterface
      * @param object $transaction row of transaction in database
      *
      * @return $this
+     * @throws BankException
+     * @throws SoapFault
      */
     public function verify($transaction);
 }

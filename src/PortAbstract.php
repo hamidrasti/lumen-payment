@@ -2,12 +2,14 @@
 
 namespace Hamraa\Payment;
 
+use Hamraa\Payment\Exceptions\BankException;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Carbon\Carbon;
+use SoapFault;
 
-abstract class PortAbstract
+abstract class PortAbstract implements PortInterface
 {
     /**
      * Transaction id
@@ -213,6 +215,7 @@ abstract class PortAbstract
         return $this->amount;
     }
 
+    /** @noinspection PhpDocRedundantThrowsInspection */
     /**
      * Return result of payment
      * If result is done, return true, otherwise throws an related exception
@@ -222,6 +225,9 @@ abstract class PortAbstract
      * @param object $transaction row of transaction in database
      *
      * @return void
+     *
+     * @throws BankException
+     * @throws SoapFault
      */
     function verify($transaction)
     {

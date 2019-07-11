@@ -85,6 +85,7 @@ class Payir extends PortAbstract implements PortInterface
      * Sets callback url
      *
      * @param $url
+     * @return Payir
      */
     function setCallback($url)
     {
@@ -106,7 +107,7 @@ class Payir extends PortAbstract implements PortInterface
     /**
      * Send pay request to server
      *
-     * @return void
+     * @return bool
      *
      * @throws PayirSendException
      */
