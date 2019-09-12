@@ -46,8 +46,8 @@ class GatewayResolver
         $this->config = app('config');
         $this->request = app('request');
 
-        if ($this->config->has('gateway.timezone')) {
-            date_default_timezone_set($this->config->get('gateway.timezone'));
+        if ($this->config->has('payment.timezone')) {
+            date_default_timezone_set($this->config->get('payment.timezone'));
         }
 
         if (!is_null($port)) $this->make($port);
@@ -61,15 +61,15 @@ class GatewayResolver
     public function getSupportedPorts()
     {
         return [
-            Gateways::MELLAT,
-            Gateways::SADAD,
-            Gateways::ZARINPAL,
-            Gateways::PARSIAN,
-            Gateways::PASARGAD,
-            Gateways::SAMAN,
-            Gateways::PAYPAL,
-            Gateways::ASANPARDAKHT,
-            Gateways::PAYIR
+            Constants::MELLAT,
+            Constants::SADAD,
+            Constants::ZARINPAL,
+            Constants::PARSIAN,
+            Constants::PASARGAD,
+            Constants::SAMAN,
+            Constants::PAYPAL,
+            Constants::ASANPARDAKHT,
+            Constants::PAYIR
         ];
     }
 
@@ -83,7 +83,6 @@ class GatewayResolver
      */
     public function __call($name, $arguments)
     {
-
         // calling by this way ( Gateway::mellat()->.. , Gateway::parsian()->.. )
         if (in_array(strtoupper($name), $this->getSupportedPorts())) {
             return $this->make($name);
@@ -98,7 +97,7 @@ class GatewayResolver
      */
     function getTable()
     {
-        return DB::table($this->config->get('gateway.table'));
+        return DB::table($this->config->get('payment.table'));
     }
 
     /**
@@ -106,10 +105,12 @@ class GatewayResolver
      *
      * @return Mellat|Pasargad|Parsian|Payir|Sadad|Saman|Zarinpal ->port
      *
+     * @throws Exceptions\BankException
      * @throws InvalidRequestException
      * @throws NotFoundTransactionException
      * @throws PortNotFoundException
      * @throws RetryException
+     * @throws \SoapFault
      */
     public function verify()
     {
@@ -126,7 +127,7 @@ class GatewayResolver
         if (!$transaction)
             throw new NotFoundTransactionException;
 
-        if (in_array($transaction->status, [Gateways::TRANSACTION_SUCCEED, Gateways::TRANSACTION_FAILED]))
+        if (in_array($transaction->status, [Constants::TRANSACTION_SUCCEED, Constants::TRANSACTION_FAILED]))
             throw new RetryException;
 
         $this->make($transaction->port);
@@ -145,21 +146,21 @@ class GatewayResolver
     function make($port)
     {
         if ($port InstanceOf Mellat) {
-            $name = Gateways::MELLAT;
+            $name = Constants::MELLAT;
         } elseif ($port InstanceOf Parsian) {
-            $name = Gateways::PARSIAN;
+            $name = Constants::PARSIAN;
         } elseif ($port InstanceOf Saman) {
-            $name = Gateways::SAMAN;
+            $name = Constants::SAMAN;
         } elseif ($port InstanceOf Zarinpal) {
-            $name = Gateways::ZARINPAL;
+            $name = Constants::ZARINPAL;
         } elseif ($port InstanceOf Sadad) {
-            $name = Gateways::SADAD;
+            $name = Constants::SADAD;
         } elseif ($port InstanceOf Asanpardakht) {
-            $name = Gateways::ASANPARDAKHT;
+            $name = Constants::ASANPARDAKHT;
         } elseif ($port InstanceOf Paypal) {
-            $name = Gateways::PAYPAL;
+            $name = Constants::PAYPAL;
         } elseif ($port InstanceOf Payir) {
-            $name = Gateways::PAYIR;
+            $name = Constants::PAYIR;
         } elseif (in_array(strtoupper($port), $this->getSupportedPorts())) {
             $port = ucfirst(strtolower($port));
             $name = strtoupper($port);

@@ -3,11 +3,11 @@
 namespace Hamraa\Payment\Gateways\Payline;
 
 use Illuminate\Support\Facades\Input;
-use Hamraa\Payment\Gateways;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Constants;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 
-class Payline extends PortAbstract implements PortInterface
+class Payline extends Port implements PortContract
 {
     /**
      * Address of main CURL server
@@ -92,7 +92,7 @@ class Payline extends PortAbstract implements PortInterface
     function getCallback()
     {
         if (!$this->callbackUrl)
-            $this->callbackUrl = $this->config->get('gateway.payline.callback-url');
+            $this->callbackUrl = $this->config->get('payment.gateways.payline.callback-url');
 
         return urlencode($this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]));
     }
@@ -109,7 +109,7 @@ class Payline extends PortAbstract implements PortInterface
         $this->newTransaction();
 
         $fields = array(
-            'api' => $this->config->get('gateway.payline.api'),
+            'api' => $this->config->get('payment.gateways.payline.api'),
             'amount' => $this->amount,
             'redirect' => $this->getCallback(),
         );
@@ -168,7 +168,7 @@ class Payline extends PortAbstract implements PortInterface
     protected function verifyPayment()
     {
         $fields = array(
-            'api' => $this->config->get('gateway.payline.api'),
+            'api' => $this->config->get('payment.gateways.payline.api'),
             'id_get' => $this->refId(),
             'trans_id' => $this->trackingCode()
         );
@@ -185,7 +185,7 @@ class Payline extends PortAbstract implements PortInterface
 
         if ($response == 1) {
             $this->transactionSucceed();
-            $this->newLog($response, Gateways::TRANSACTION_SUCCEED_TEXT);
+            $this->newLog($response, Constants::TRANSACTION_SUCCEED_TEXT);
 
             return true;
         }

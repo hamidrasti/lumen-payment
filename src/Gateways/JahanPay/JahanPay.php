@@ -7,12 +7,12 @@
 namespace Hamraa\Payment\Gateways\JahanPay;
 
 use Illuminate\Support\Facades\Input;
-use Hamraa\Payment\Gateways;
+use Hamraa\Payment\Constants;
 use SoapClient;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 
-class JahanPay extends PortAbstract implements PortInterface
+class JahanPay extends Port implements PortContract
 {
     /**
      * Address of main SOAP server
@@ -88,7 +88,7 @@ class JahanPay extends PortAbstract implements PortInterface
     function getCallback()
     {
         if (!$this->callbackUrl)
-            $this->callbackUrl = $this->config->get('gateway.jahanpay.callback-url');
+            $this->callbackUrl = $this->config->get('payment.gateways.jahanpay.callback-url');
 
         return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
     }
@@ -108,7 +108,7 @@ class JahanPay extends PortAbstract implements PortInterface
         try {
             $soap = new SoapClient($this->serverUrl);
             $response = $soap->requestpayment(
-                $this->config->get('gateway.jahanpay.api'),
+                $this->config->get('payment.gateways.jahanpay.api'),
                 $this->amount,
                 $this->getCallback(),
                 $this->transactionId(),
@@ -165,7 +165,7 @@ class JahanPay extends PortAbstract implements PortInterface
         try {
             $soap = new SoapClient($this->serverUrl);
             $response = $soap->verification(
-                $this->config->get('gateway.jahanpay.api'),
+                $this->config->get('payment.gateways.jahanpay.api'),
                 $this->amount,
                 $this->refId
             );
@@ -178,7 +178,7 @@ class JahanPay extends PortAbstract implements PortInterface
 
         if (intval($response) == 1) {
             $this->transactionSucceed();
-            $this->newLog($response, Gateways::TRANSACTION_SUCCEED_TEXT);
+            $this->newLog($response, Constants::TRANSACTION_SUCCEED_TEXT);
             return true;
         }
 

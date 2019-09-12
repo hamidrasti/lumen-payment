@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Request;
 use Carbon\Carbon;
 use SoapFault;
 
-abstract class PortAbstract implements PortInterface
+abstract class Port implements PortContract
 {
     /**
      * Transaction id
@@ -107,7 +107,7 @@ abstract class PortAbstract implements PortInterface
      */
     function getTable()
     {
-        return $this->db->table($this->config->get('gateway.table'));
+        return $this->db->table($this->config->get('payment.table'));
     }
 
     /**
@@ -115,7 +115,7 @@ abstract class PortAbstract implements PortInterface
      */
     function getLogTable()
     {
-        return $this->db->table($this->config->get('gateway.table') . '_logs');
+        return $this->db->table($this->config->get('payment.table') . '_logs');
     }
 
     /**
@@ -261,7 +261,7 @@ abstract class PortAbstract implements PortInterface
             'id' => $uid,
             'port' => $this->getPortName(),
             'price' => $this->amount,
-            'status' => Gateways::TRANSACTION_INIT,
+            'status' => Constants::TRANSACTION_INIT,
             'ip' => Request::ip(),
             'description' => $this->description,
             'created_at' => Carbon::now(),
@@ -281,7 +281,7 @@ abstract class PortAbstract implements PortInterface
     protected function transactionSucceed(array $fields = [])
     {
         $updateFields = [
-            'status' => Gateways::TRANSACTION_SUCCEED,
+            'status' => Constants::TRANSACTION_SUCCEED,
             'tracking_code' => $this->trackingCode,
             'card_number' => $this->cardNumber,
             'payment_date' => Carbon::now(),
@@ -304,7 +304,7 @@ abstract class PortAbstract implements PortInterface
     protected function transactionFailed()
     {
         return $this->getTable()->whereId($this->transactionId)->update([
-            'status' => Gateways::TRANSACTION_FAILED,
+            'status' => Constants::TRANSACTION_FAILED,
             'updated_at' => Carbon::now(),
         ]);
     }

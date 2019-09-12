@@ -5,12 +5,12 @@
 namespace Hamraa\Payment\Gateways\Zarinpal;
 
 use Illuminate\Support\Facades\Input;
-use Hamraa\Payment\Gateways;
+use Hamraa\Payment\Constants;
 use SoapClient;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 
-class Zarinpal extends PortAbstract implements PortInterface
+class Zarinpal extends Port implements PortContract
 {
 	/**
 	 * Address of germany SOAP server
@@ -114,7 +114,7 @@ class Zarinpal extends PortAbstract implements PortInterface
 	 */
 	public function redirect()
 	{
-		switch ($this->config->get('gateway.zarinpal.type')) {
+		switch ($this->config->get('payment.gateways.zarinpal.type')) {
 			case 'zarin-gate':
 				return redirect(str_replace('$Authority', $this->refId, $this->zarinGateUrl));
 				break;
@@ -157,7 +157,7 @@ class Zarinpal extends PortAbstract implements PortInterface
 	function getCallback()
 	{
 		if (!$this->callbackUrl)
-			$this->callbackUrl = $this->config->get('gateway.zarinpal.callback-url');
+			$this->callbackUrl = $this->config->get('payment.gateways.zarinpal.callback-url');
 
 		return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
 	}
@@ -175,12 +175,12 @@ class Zarinpal extends PortAbstract implements PortInterface
 		$this->newTransaction();
 
 		$fields = array(
-			'MerchantID' => $this->config->get('gateway.zarinpal.merchant-id'),
+			'MerchantID' => $this->config->get('payment.gateways.zarinpal.merchant-id'),
 			'Amount' => $this->amount,
 			'CallbackURL' => $this->getCallback(),
-			'Description' => $this->description ? $this->description : $this->config->get('gateway.zarinpal.description', ''),
-			'Email' => $this->email ? $this->email :$this->config->get('gateway.zarinpal.email', ''),
-			'Mobile' => $this->mobileNumber ? $this->mobileNumber : $this->config->get('gateway.zarinpal.mobile', ''),
+			'Description' => $this->description ? $this->description : $this->config->get('payment.gateways.zarinpal.description', ''),
+			'Email' => $this->email ? $this->email :$this->config->get('payment.gateways.zarinpal.email', ''),
+			'Mobile' => $this->mobileNumber ? $this->mobileNumber : $this->config->get('payment.gateways.zarinpal.mobile', ''),
 		);
 
 		try {
@@ -236,7 +236,7 @@ class Zarinpal extends PortAbstract implements PortInterface
 	{
 
 		$fields = array(
-			'MerchantID' => $this->config->get('gateway.zarinpal.merchant-id'),
+			'MerchantID' => $this->config->get('payment.gateways.zarinpal.merchant-id'),
 			'Authority' => $this->refId,
 			'Amount' => $this->amount,
 		);
@@ -259,7 +259,7 @@ class Zarinpal extends PortAbstract implements PortInterface
 
 		$this->trackingCode = $response->RefID;
 		$this->transactionSucceed();
-		$this->newLog($response->Status, Gateways::TRANSACTION_SUCCEED_TEXT);
+		$this->newLog($response->Status, Constants::TRANSACTION_SUCCEED_TEXT);
 		return true;
 	}
 
@@ -270,7 +270,7 @@ class Zarinpal extends PortAbstract implements PortInterface
 	 */
 	protected function setServer()
 	{
-		$server = $this->config->get('gateway.zarinpal.server', 'germany');
+		$server = $this->config->get('payment.gateways.zarinpal.server', 'germany');
 		switch ($server) {
 			case 'iran':
 				$this->serverUrl = $this->iranServer;

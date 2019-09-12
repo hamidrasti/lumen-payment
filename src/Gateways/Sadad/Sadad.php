@@ -7,10 +7,10 @@
 namespace Hamraa\Payment\Gateways\Sadad;
 
 use SoapClient;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 
-class Sadad extends PortAbstract implements PortInterface
+class Sadad extends Port implements PortContract
 {
     /**
      * Url of sadad gateway web service
@@ -88,7 +88,7 @@ class Sadad extends PortAbstract implements PortInterface
     function getCallback()
     {
         if (!$this->callbackUrl)
-            $this->callbackUrl = $this->config->get('gateway.sadad.callback-url');
+            $this->callbackUrl = $this->config->get('payment.gateways.sadad.callback-url');
 
         return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
     }
@@ -111,11 +111,11 @@ class Sadad extends PortAbstract implements PortInterface
             $soap = new SoapClient($this->serverUrl);
 
             $response = $soap->PaymentUtility(
-                $this->config->get('gateway.sadad.merchant'),
+                $this->config->get('payment.gateways.sadad.merchant'),
                 $this->amount,
                 $this->transactionId(),
-                $this->config->get('gateway.sadad.transactionKey'),
-                $this->config->get('gateway.sadad.terminalId'),
+                $this->config->get('payment.gateways.sadad.transactionKey'),
+                $this->config->get('payment.gateways.sadad.terminalId'),
                 $this->getCallback()
             );
 
@@ -150,9 +150,9 @@ class Sadad extends PortAbstract implements PortInterface
 
             $result = $soap->CheckRequestStatusResult(
                 $this->transactionId(),
-                $this->config->get('gateway.sadad.merchant'),
-                $this->config->get('gateway.sadad.terminalId'),
-                $this->config->get('gateway.sadad.transactionKey'),
+                $this->config->get('payment.gateways.sadad.merchant'),
+                $this->config->get('payment.gateways.sadad.terminalId'),
+                $this->config->get('payment.gateways.sadad.transactionKey'),
                 $this->refId(),
                 $this->amount
             );

@@ -8,13 +8,13 @@ namespace Hamraa\Payment\Gateways\Mellat;
 
 use DateTime;
 use Illuminate\Support\Facades\Input;
-use Hamraa\Payment\Gateways;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Constants;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 use SoapClient;
 use SoapFault;
 
-class Mellat extends PortAbstract implements PortInterface
+class Mellat extends Port implements PortContract
 {
     /**
      * Address of main SOAP server
@@ -86,7 +86,7 @@ class Mellat extends PortAbstract implements PortInterface
     function getCallback()
     {
         if (!$this->callbackUrl)
-            $this->callbackUrl = $this->config->get('gateway.mellat.callback-url');
+            $this->callbackUrl = $this->config->get('payment.gateways.mellat.callback-url');
 
         return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
     }
@@ -112,9 +112,9 @@ class Mellat extends PortAbstract implements PortInterface
         $this->newTransaction();
 
         $fields = array(
-            'terminalId' => $this->config->get('gateway.mellat.terminalId'),
-            'userName' => $this->config->get('gateway.mellat.username'),
-            'userPassword' => $this->config->get('gateway.mellat.password'),
+            'terminalId' => $this->config->get('payment.gateways.mellat.terminalId'),
+            'userName' => $this->config->get('payment.gateways.mellat.username'),
+            'userPassword' => $this->config->get('payment.gateways.mellat.password'),
             'orderId' => $this->transactionId(),
             'amount' => $this->amount,
             'localDate' => $dateTime->format('Ymd'),
@@ -178,9 +178,9 @@ class Mellat extends PortAbstract implements PortInterface
     protected function verifyPayment()
     {
         $fields = array(
-            'terminalId' => $this->config->get('gateway.mellat.terminalId'),
-            'userName' => $this->config->get('gateway.mellat.username'),
-            'userPassword' => $this->config->get('gateway.mellat.password'),
+            'terminalId' => $this->config->get('payment.gateways.mellat.terminalId'),
+            'userName' => $this->config->get('payment.gateways.mellat.username'),
+            'userPassword' => $this->config->get('payment.gateways.mellat.password'),
             'orderId' => $this->transactionId(),
             'saleOrderId' => $this->transactionId(),
             'saleReferenceId' => $this->trackingCode()
@@ -216,9 +216,9 @@ class Mellat extends PortAbstract implements PortInterface
     protected function settleRequest()
     {
         $fields = array(
-            'terminalId' => $this->config->get('gateway.mellat.terminalId'),
-            'userName' => $this->config->get('gateway.mellat.username'),
-            'userPassword' => $this->config->get('gateway.mellat.password'),
+            'terminalId' => $this->config->get('payment.gateways.mellat.terminalId'),
+            'userName' => $this->config->get('payment.gateways.mellat.username'),
+            'userPassword' => $this->config->get('payment.gateways.mellat.password'),
             'orderId' => $this->transactionId(),
             'saleOrderId' => $this->transactionId(),
             'saleReferenceId' => $this->trackingCode
@@ -235,7 +235,7 @@ class Mellat extends PortAbstract implements PortInterface
 
         if ($response->return == '0' || $response->return == '45') {
             $this->transactionSucceed();
-            $this->newLog($response->return, Gateways::TRANSACTION_SUCCEED_TEXT);
+            $this->newLog($response->return, Constants::TRANSACTION_SUCCEED_TEXT);
             return true;
         }
 

@@ -2,10 +2,10 @@
 
 namespace Hamraa\Payment\Gateways\Paypal;
 
-use Hamraa\Payment\Gateways;
+use Hamraa\Payment\Constants;
 use Illuminate\Support\Facades\Input;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 use PayPal\Api\Amount;
 use PayPal\Api\Item;
 use PayPal\Api\ItemList;
@@ -18,7 +18,7 @@ use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Exception\PayPalConnectionException;
 use PayPal\Rest\ApiContext;
 
-class Paypal extends PortAbstract implements PortInterface
+class Paypal extends Port implements PortContract
 {
     private $_api_context;
     protected $productName;
@@ -61,14 +61,14 @@ class Paypal extends PortAbstract implements PortInterface
     function getCallback()
     {
         if (!$this->callbackUrl)
-            $this->callbackUrl = $this->config->get('gateway.paypal.settings.call_back_url');
+            $this->callbackUrl = $this->config->get('payment.gateways.paypal.settings.call_back_url');
 
         return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
     }
 
     public function setApiContext()
     {
-        $paypal_conf = $this->config->get('gateway.paypal');
+        $paypal_conf = $this->config->get('payment.gateways.paypal');
         $this->_api_context = new ApiContext(new OAuthTokenCredential($paypal_conf['client_id'], $paypal_conf['secret']));
         $this->_api_context->setConfig($paypal_conf['settings']);
     }
@@ -103,7 +103,7 @@ class Paypal extends PortAbstract implements PortInterface
         $this->userPayment();
         if ($this->verifyPayment()) {
             $this->transactionSucceed();
-            $this->newLog(200, Gateways::TRANSACTION_SUCCEED_TEXT);
+            $this->newLog(200, Constants::TRANSACTION_SUCCEED_TEXT);
         }
 
         return $this;
@@ -235,7 +235,7 @@ class Paypal extends PortAbstract implements PortInterface
 
     public function getProductName(){
         if(!$this->productName){
-            return $this->config->get('gateway.paypal.default_product_name');
+            return $this->config->get('payment.gateways.paypal.default_product_name');
         }
 
         return $this->productName;
@@ -243,7 +243,7 @@ class Paypal extends PortAbstract implements PortInterface
 
     public function getShipmentPrice(){
         if(!$this->shipmentPrice){
-            return $this->config->get('gateway.paypal.default_shipment_price');
+            return $this->config->get('payment.gateways.paypal.default_shipment_price');
         }
 
         return $this->shipmentPrice;

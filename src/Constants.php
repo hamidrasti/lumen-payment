@@ -2,7 +2,7 @@
 
 namespace Hamraa\Payment;
 
-class Gateways
+class Constants
 {
     const MELLAT = 'MELLAT';
     const SADAD = 'SADAD';

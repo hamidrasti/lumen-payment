@@ -5,7 +5,7 @@ namespace Hamraa\Payment;
 use Hamraa\Payment\Exceptions\BankException;
 use SoapFault;
 
-interface PortInterface
+interface PortContract
 {
 
     /**

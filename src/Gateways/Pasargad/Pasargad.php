@@ -3,11 +3,11 @@
 namespace Hamraa\Payment\Gateways\Pasargad;
 
 use Illuminate\Support\Facades\Input;
-use Hamraa\Payment\Gateways;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Constants;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 
-class Pasargad extends PortAbstract implements PortInterface
+class Pasargad extends Port implements PortContract
 {
     /**
      * Url of parsian gateway web service
@@ -51,14 +51,14 @@ class Pasargad extends PortAbstract implements PortInterface
     public function redirect()
     {
 
-        $processor = new RSAProcessor($this->config->get('gateway.pasargad.certificate-path'), RSAKeyType::XMLFile);
+        $processor = new RSAProcessor($this->config->get('payment.gateways.pasargad.certificate-path'), RSAKeyType::XMLFile);
 
         $url = $this->gateUrl;
         $redirectUrl = $this->getCallback();
         $invoiceNumber = $this->transactionId();
         $amount = $this->amount;
-        $terminalCode = $this->config->get('gateway.pasargad.terminalId');
-        $merchantCode = $this->config->get('gateway.pasargad.merchantId');
+        $terminalCode = $this->config->get('payment.gateways.pasargad.terminalId');
+        $merchantCode = $this->config->get('payment.gateways.pasargad.merchantId');
         $timeStamp = date("Y/m/d H:i:s");
         $invoiceDate = date("Y/m/d H:i:s");
         $action = 1003;
@@ -100,7 +100,7 @@ class Pasargad extends PortAbstract implements PortInterface
     function getCallback()
     {
         if (!$this->callbackUrl)
-            $this->callbackUrl = $this->config->get('gateway.pasargad.callback-url');
+            $this->callbackUrl = $this->config->get('payment.gateways.pasargad.callback-url');
 
         return $this->callbackUrl;
     }
@@ -136,9 +136,9 @@ class Pasargad extends PortAbstract implements PortInterface
 
 
         if ($array['result'] != "True") {
-            $this->newLog(-1, Gateways::TRANSACTION_FAILED_TEXT);
+            $this->newLog(-1, Constants::TRANSACTION_FAILED_TEXT);
             $this->transactionFailed();
-            throw new PasargadErrorException(Gateways::TRANSACTION_FAILED_TEXT, -1);
+            throw new PasargadErrorException(Constants::TRANSACTION_FAILED_TEXT, -1);
         }
 
         $this->refId = $array['transactionReferenceID'];
@@ -146,7 +146,7 @@ class Pasargad extends PortAbstract implements PortInterface
 
         $this->trackingCode = $array['traceNumber'];
         $this->transactionSucceed();
-        $this->newLog($array['result'], Gateways::TRANSACTION_SUCCEED_TEXT);
+        $this->newLog($array['result'], Constants::TRANSACTION_SUCCEED_TEXT);
     }
 
     /**
@@ -155,9 +155,9 @@ class Pasargad extends PortAbstract implements PortInterface
      */
     protected function callVerifyPayment($data)
     {
-        $processor = new RSAProcessor($this->config->get('gateway.pasargad.certificate-path'), RSAKeyType::XMLFile);
-        $merchantCode = $this->config->get('gateway.pasargad.merchantId');
-        $terminalCode = $this->config->get('gateway.pasargad.terminalId');
+        $processor = new RSAProcessor($this->config->get('payment.gateways.pasargad.certificate-path'), RSAKeyType::XMLFile);
+        $merchantCode = $this->config->get('payment.gateways.pasargad.merchantId');
+        $terminalCode = $this->config->get('payment.gateways.pasargad.terminalId');
         $invoiceNumber = $data['invoiceNumber'];
         $invoiceDate = $data['invoiceDate'];
         $timeStamp = date("Y/m/d H:i:s");

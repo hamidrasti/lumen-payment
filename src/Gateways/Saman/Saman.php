@@ -8,11 +8,11 @@ namespace Hamraa\Payment\Gateways\Saman;
 
 use Illuminate\Support\Facades\Input;
 use SoapClient;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 use SoapFault;
 
-class Saman extends PortAbstract implements PortInterface
+class Saman extends Port implements PortContract
 {
     /**
      *
@@ -69,7 +69,7 @@ class Saman extends PortAbstract implements PortInterface
     {
         $main_data = [
             'amount' => $this->amount,
-            'merchant' => $this->config->get('gateway.saman.merchant'),
+            'merchant' => $this->config->get('payment.gateways.saman.merchant'),
             'resNum' => $this->transactionId(),
             'callBackUrl' => $this->getCallback()
         ];
@@ -111,7 +111,7 @@ class Saman extends PortAbstract implements PortInterface
     function getCallback()
     {
         if (!$this->callbackUrl)
-            $this->callbackUrl = $this->config->get('gateway.saman.callback-url');
+            $this->callbackUrl = $this->config->get('payment.gateways.saman.callback-url');
 
         $url = $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
 
@@ -155,9 +155,9 @@ class Saman extends PortAbstract implements PortInterface
     protected function verifyPayment()
     {
         $fields = array(
-            "merchantID" => $this->config->get('gateway.saman.merchant'),
+            "merchantID" => $this->config->get('payment.gateways.saman.merchant'),
             "RefNum" => $this->refId,
-            "password" => $this->config->get('gateway.saman.password'),
+            "password" => $this->config->get('payment.gateways.saman.password'),
         );
 
 

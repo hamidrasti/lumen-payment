@@ -3,18 +3,19 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGatewayStatusLogTable extends Migration
+class CreatePaymentTransactionsStatusLogsTable extends Migration
 {
 
     function getTable()
     {
-        return config('gateway.table','gateway_transactions');
+        return config('payment.table', 'payment_transactions');
     }
 
     function getLogTable()
     {
-        return $this->getTable().'_logs';
+        return $this->getTable() . '_logs';
     }
+
     /**
      * Run the migrations.
      *
@@ -23,9 +24,9 @@ class CreateGatewayStatusLogTable extends Migration
     public function up()
     {
         Schema::create($this->getLogTable(), function (Blueprint $table) {
-            $table->engine="innoDB";
-            $table->increments('id');
-            $table->unsignedBigInteger('transaction_id'); 
+            $table->engine = "innoDB";
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('transaction_id');
             $table->string('result_code', 10)->nullable();
             $table->string('result_message', 255)->nullable();
             $table->timestamp('log_date')->nullable();

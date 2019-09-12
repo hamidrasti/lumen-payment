@@ -8,10 +8,10 @@ namespace Hamraa\Payment\Gateways\Parsian;
 
 use Illuminate\Support\Facades\Input;
 use SoapClient;
-use Hamraa\Payment\PortAbstract;
-use Hamraa\Payment\PortInterface;
+use Hamraa\Payment\Port;
+use Hamraa\Payment\PortContract;
 
-class Parsian extends PortAbstract implements PortInterface
+class Parsian extends Port implements PortContract
 {
     /**
      * Url of parsian gateway web service
@@ -88,7 +88,7 @@ class Parsian extends PortAbstract implements PortInterface
     function getCallback()
     {
         if (!$this->callbackUrl)
-            $this->callbackUrl = $this->config->get('gateway.parsian.callback-url');
+            $this->callbackUrl = $this->config->get('payment.gateways.parsian.callback-url');
 
         return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
     }
@@ -108,7 +108,7 @@ class Parsian extends PortAbstract implements PortInterface
 
         $params = array(
             "requestData" => array(
-                'LoginAccount' => $this->config->get('gateway.parsian.pin'),
+                'LoginAccount' => $this->config->get('payment.gateways.parsian.pin'),
                 'Amount' => $this->amount,
                 'OrderId' => $this->transactionId(),
                 'CallBackUrl' => $this->getCallback(),
@@ -185,7 +185,7 @@ class Parsian extends PortAbstract implements PortInterface
 
         $params = array(
             "requestData" => array(
-                'LoginAccount' => $this->config->get('gateway.parsian.pin'),
+                'LoginAccount' => $this->config->get('payment.gateways.parsian.pin'),
                 'Token' => $authority,
                 // 'status' => 1
             )
