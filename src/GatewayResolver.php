@@ -164,7 +164,7 @@ class GatewayResolver
         } elseif (in_array(strtoupper($port), $this->getSupportedPorts())) {
             $port = ucfirst(strtolower($port));
             $name = strtoupper($port);
-            $class = __NAMESPACE__ . '\\' . $port . '\\' . $port;
+            $class = __NAMESPACE__ . '\\Gateways' . '\\' . $port . '\\' . $port;
             $port = new $class;
         } else
             throw new PortNotFoundException;
