@@ -5,6 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Hamraa\Payment\Port;
 use Hamraa\Payment\GatewayResolver;
 use Hamraa\Payment\Constants;
+use Illuminate\Support\Facades\Schema;
 
 class CreatePaymentTransactionsTable extends Migration
 {
