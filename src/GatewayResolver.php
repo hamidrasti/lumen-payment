@@ -46,8 +46,9 @@ class GatewayResolver
         $this->config = app('config');
         $this->request = app('request');
 
-        if ($this->config->has('payment.timezone')) {
-            date_default_timezone_set($this->config->get('payment.timezone'));
+        $timezone = $this->config->get('payment.timezone');
+        if ($timezone) {
+            date_default_timezone_set($timezone);
         }
 
         if (!is_null($port)) $this->make($port);
