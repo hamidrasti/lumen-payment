@@ -120,7 +120,7 @@ try {
     // تراکنش با موفقیت سمت بانک تایید گردید
     // در این مرحله عملیات خرید کاربر را تکمیل میکنیم
     
-} catch (\Larabookir\Gateway\Exceptions\RetryException $e) {
+} catch (\Hamraa\Payment\Exceptions\RetryException $e) {
 
     // تراکنش قبلا سمت بانک تاییده شده است و
     // کاربر احتمالا صفحه را مجددا رفرش کرده است
