@@ -67,7 +67,7 @@ php artisan migrate
 Done!
 
 ## Usage
-You can make connection to bank by several way (Facade , Service container):
+You can make connection to bank in several ways (Facade , Service container):
 
 ```php
 try {
