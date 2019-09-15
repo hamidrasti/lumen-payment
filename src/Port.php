@@ -349,11 +349,12 @@ abstract class Port implements PortContract
      */
     protected function makeCallback($url, array $query)
     {
-        return $this->url_modify(array_merge($query, ['_token' => app('session')->token()]), url($url));
+        return $this->url_modify(array_merge($query, ['_token' => '']), url($url));
     }
 
     /**
      * manipulate the Current/Given URL with the given parameters
+     *
      * @param $changes
      * @param  $url
      * @return string
@@ -375,6 +376,7 @@ abstract class Port implements PortContract
         return (!empty($url_array['scheme']) ? $url_array['scheme'] . '://' : null) .
             (!empty($url_array['host']) ? $url_array['host'] : null) .
             (!empty($url_array['port']) ? ':' . $url_array['port'] : null) .
-            $url_array['path'] . '?' . http_build_query($query_array);
+            (!empty($url_array['path']) ? $url_array['path'] : null) .
+            '?' . http_build_query($query_array);
     }
 }
