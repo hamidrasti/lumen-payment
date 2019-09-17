@@ -33,6 +33,7 @@ mkdir -p config
 cp vendor/hamraa/lumen-payment/config/payment.php config/payment.php
 cp vendor/hamraa/lumen-payment/database/migrations/create_payment_transactions_table.php.stub database/migrations/2016_01_01_000000_create_payment_transactions_table.php
 cp vendor/hamraa/lumen-payment/database/migrations/create_payment_transactions_status_logs_table.php.stub database/migrations/2016_01_01_000000_create_payment_transactions_status_logs_table.php
+cp vendor/hamraa/lumen-payment/resources/views resources/views
 ```
 
 
